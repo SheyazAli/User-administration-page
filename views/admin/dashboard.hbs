@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar {
+            background-color: #0d6efd !important;
+        }
+
+        .navbar-brand {
+            color: #fff !important;
+            font-weight: 600;
+            font-size: 1.5rem;
+        }
+
+        .dashboard-container {
+            padding: 40px;
+        }
+
+        h2 {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .table-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .add-user-btn {
+            background-color: #198754;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            transition: background 0.3s;
+        }
+
+        .add-user-btn:hover {
+            background-color: #157347;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-box input {
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            width: 200px;
+        }
+
+        .search-box button {
+            background-color: #0d6efd;
+            border: none;
+            color: white;
+            border-radius: 6px;
+            padding: 8px 14px;
+            transition: 0.3s;
+        }
+
+        .search-box button:hover {
+            background-color: #0b5ed7;
+        }
+
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .user-table th,
+        .user-table td {
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .user-table th {
+            background-color: #e9ecef;
+        }
+
+        .edit-btn,
+        .delete-btn {
+            border: none;
+            border-radius: 5px;
+            padding: 6px 12px;
+            color: white;
+            margin: 2px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .edit-btn {
+            background-color: #0d6efd;
+        }
+
+        .edit-btn:hover {
+            background-color: #0b5ed7;
+        }
+
+        .delete-btn {
+            background-color: #dc3545;
+        }
+
+        .delete-btn:hover {
+            background-color: #b02a37;
+        }
+
+        /* Modal Styling */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            width: 400px;
+            position: relative;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-content h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #888;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .modal-btn {
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .modal-btn:hover {
+            background-color: #0b5ed7;
+        }
+
+        input {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 8px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-light">
+        <div class="container-fluid">
+            <a class="navbar-brand">Dashboard</a>
+            <button class="btn btn-danger">
+                <a href="/admin/logout" class="text-white text-decoration-none">Logout</a>
+            </button>
+        </div>
+    </nav>
+
+    <main class="dashboard-container">
+        <h2>User Management</h2>
+        <div class="table-controls">
+            <button class="add-user-btn" onclick="openAddUserModal()">Add User</button>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search user..." />
+                <button onclick="searchUser()">Search</button>
+            </div>
+        </div>
+
+        <table class="user-table" id="userTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Username</th>
+                    <th>Email ID</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each users}}
+                <tr>
+                    <td>{{@index}}</td>
+                    <td>{{this.username}}</td>
+                    <td>{{this.email}}</td>
+                    <td>
+                        <button class="edit-btn"
+                            onclick="openEditUserModal('{{this._id}}','{{this.username}}','{{this.email}}')">Edit</button>
+                        <button class="delete-btn" onclick="deleteUser('{{this._id}}')">Delete</button>
+                    </td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </main>
+
+    <!-- Add User Modal -->
+    <div id="addUserModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddUserModal()">&times;</span>
+            <h2>Add User</h2>
+            <form id="addUserForm" method="post" action="/admin/add-user" onsubmit="return validateAddUserForm()">
+                <label>Username:</label>
+                <input type="text" id="addUsername" name="username" required />
+
+                <label>Email:</label>
+                <input type="email" id="addEmail" name="email" required />
+
+                <label>Password:</label>
+                <input type="password" id="addPassword" name="password" required />
+
+                <button type="submit" class="modal-btn">Add User</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div id="editUserModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditUserModal()">&times;</span>
+            <h2>Edit User</h2>
+            <form id="editUserForm" method="post" action="/admin/edit-user">
+                <input type="hidden" id="editUserId" name="id" />
+                <label>Username:</label>
+                <input type="text" id="editUsername" name="username" required />
+                <label>Email:</label>
+                <input type="email" id="editEmail" name="email" required />
+                <label>New Password:</label>
+                <input type="password" id="editPassword" name="password" required />
+                <button type="submit" class="modal-btn">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+    <script>
+        // Open/close Add User Modal
+        function openAddUserModal() { document.getElementById('addUserModal').style.display = 'flex'; }
+        function closeAddUserModal() { document.getElementById('addUserModal').style.display = 'none'; }
+
+        // Open/close Edit User Modal
+        function openEditUserModal(id, username, email) {
+            document.getElementById('editUserModal').style.display = 'flex';
+            document.getElementById('editUserId').value = id;
+            document.getElementById('editUsername').value = username;
+            document.getElementById('editEmail').value = email;
+        }
+        function closeEditUserModal() { document.getElementById('editUserModal').style.display = 'none'; }
+
+        // Delete User
+        function deleteUser(userId) {
+            swal({
+                title: "Are you sure?",
+                text: "Once deleted, this user cannot be recovered!",
+                icon: "warning",
+                buttons: true,
+                dangerMode: true,
+            }).then((willDelete) => {
+                if (willDelete) window.location.href = `/admin/delete-user/${userId}`;
+            });
+        }
+
+        // Search User
+        function searchUser() {
+            const searchValue = document.getElementById("searchInput").value.toLowerCase();
+            const table = document.getElementById("userTable");
+            const rows = table.getElementsByTagName("tr");
+
+            for (let i = 1; i < rows.length; i++) {
+                const username = rows[i].getElementsByTagName("td")[1];
+                const email = rows[i].getElementsByTagName("td")[2];
+                if (username && email) {
+                    const usernameText = username.textContent.toLowerCase();
+                    const emailText = email.textContent.toLowerCase();
+                    rows[i].style.display =
+                        usernameText.includes(searchValue) || emailText.includes(searchValue)
+                            ? ""
+                            : "none";
+                }
+            }
+        }
+
+        // Validate Add User
+        function validateAddUserForm() {
+            const password = document.getElementById("addPassword").value;
+            const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+
+            if (!passwordRegex.test(password)) {
+                swal("Password must be at least 8 characters long and include both letters and numbers.");
+                return false;
+            }
+            return true;
+        }
+
+        // ✅ SweetAlert Success Messages
+        function addUserAlert() {
+            swal({
+                title: "Success!",
+                text: "User added successfully!",
+                icon: "success",
+                button: "OK",
+            });
+        }
+
+        function updateUserAlert() {
+            swal({
+                title: "Updated!",
+                text: "User details updated successfully!",
+                icon: "success",
+                button: "OK",
+            });
+        }
+
+        // ✅ Trigger Alerts (if backend passes success message)
+        document.addEventListener("DOMContentLoaded", function () {
+            const success = "{{success}}";
+            if (success === "user_added") addUserAlert();
+            if (success === "user_updated") updateUserAlert();
+        });
+    </script>
+</body>
+
+</html>

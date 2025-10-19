@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Signup</title>
+
+    <!-- ✅ Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
+
+    <!-- ✅ SweetAlert -->
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #080710;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .background {
+            width: 430px;
+            height: 600px;
+            position: absolute;
+            transform: translate(-50%, -50%);
+            left: 50%;
+            top: 50%;
+        }
+
+        .background .shape {
+            height: 200px;
+            width: 200px;
+            position: absolute;
+            border-radius: 50%;
+        }
+
+        .shape:first-child {
+            background: linear-gradient(#1845ad, #23a2f6);
+            left: -80px;
+            top: -80px;
+        }
+
+        .shape:last-child {
+            background: linear-gradient(to right, #ff512f, #f09819);
+            right: -30px;
+            bottom: -80px;
+        }
+
+        form {
+            height: 520px;
+            width: 400px;
+            background-color: rgba(255, 255, 255, 0.13);
+            position: absolute;
+            transform: translate(-50%, -50%);
+            top: 50%;
+            left: 50%;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 40px rgba(8, 7, 16, 0.6);
+            padding: 50px 35px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        form * {
+            color: #ffffff;
+            letter-spacing: 0.5px;
+            outline: none;
+            border: none;
+        }
+
+        form h3 {
+            font-size: 32px;
+            font-weight: 500;
+            line-height: 42px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            margin-top: 12px;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        input {
+            display: block;
+            height: 45px;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.07);
+            border-radius: 3px;
+            padding: 0 10px;
+            margin-top: 8px;
+            font-size: 14px;
+            font-weight: 300;
+            color: #fff;
+        }
+
+        ::placeholder {
+            color: #e5e5e5;
+        }
+
+        .btn-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        button,
+        .login-btn {
+            width: 100%;
+            padding: 12px 0;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            transition: 0.3s ease;
+        }
+
+        button {
+            background-color: #ffffff;
+            color: #080710;
+        }
+
+        button:hover {
+            background-color: #dcdcdc;
+        }
+
+        .login-btn {
+            background-color: #23a2f6;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .login-btn:hover {
+            background-color: #1c8de0;
+        }
+
+        .error {
+            color: #ff8080;
+            font-size: 14px;
+            margin-top: 5px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background">
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+
+    <form id="signupForm" action="/user/register" method="post" onsubmit="return formValidate()">
+        <h3>Create Account</h3>
+        <h4 class="text-warning" style="text-align:center;">{{msg}}</h4>
+
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" placeholder="Enter Username">
+
+        <label for="email">Email ID</label>
+        <input type="email" id="email" name="email" placeholder="Enter your Email ID">
+
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="Password (min 8 chars, letters & numbers)">
+
+        <div class="error" id="errorMsg"></div>
+
+        <div class="btn-container">
+            <button type="submit">Sign Up</button>
+            <a href="/user/login" class="login-btn">Login</a>
+        </div>
+    </form>
+
+    <script>
+        function formValidate() {
+            var username = document.getElementById('username').value.trim();
+            var email = document.getElementById('email').value.trim();
+            var password = document.getElementById('password').value.trim();
+
+            if (username === '' || email === '' || password === '') {
+                swal('All fields are required!');
+                return false;
+            }
+
+            const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+            if (!passwordRegex.test(password)) {
+                swal('Password must be at least 8 characters long and include both letters and numbers.');
+                return false;
+            }
+
+            return true;
+        }
+    </script>
+
+</body>
+
+</html>
