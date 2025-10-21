@@ -366,11 +366,22 @@
             });
         }
 
+        function userExistsAlert() {
+            swal({
+                title: "User Exists!",
+                text: "A user with this email or username already exists.",
+                icon: "warning",
+                button: "OK",
+            });
+        }
+
         // ✅ Trigger Alerts (if backend passes success message)
         document.addEventListener("DOMContentLoaded", function () {
             const success = "{{success}}";
+
             if (success === "user_added") addUserAlert();
             if (success === "user_updated") updateUserAlert();
+            if (success === "user_exists") userExistsAlert();
         });
     </script>
 </body>

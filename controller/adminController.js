@@ -71,25 +71,49 @@ const loadDashboard = async (req, res) => {
     }
 };
 
-const editUser = async (req,res) =>{
-    try {
-       const {id,email,username,password} = req.body 
-       const hashedPassword = await bcrypt.hash(password,10)
-       const user = await userModel.findOneAndUpdate({_id:id},{$set:{email,username,password:hashedPassword}})
-        const allUsers = await userModel.find({})
-         // Fetch updated users
+const editUser = async (req, res) => {
+  try {
+    const { id, email, username, password } = req.body;
+
+    // 🔍 Check if another user (not this one) already has the same email or username
+    const existingUser = await userModel.findOne({
+      $or: [{ email }, { username }],
+      _id: { $ne: id } // exclude the current user
+    });
+
+    if (existingUser) {
+      // ⚠️ User already exists with same email or username
+      const users = await userModel.find({});
+      return res.render("admin/dashboard", {
+        admin: req.session.admin,
+        users,
+        success: "user_exists" // will trigger SweetAlert
+      });
+    }
+
+    // 🔑 Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // 📝 Update user
+    await userModel.findOneAndUpdate(
+      { _id: id },
+      { $set: { email, username, password: hashedPassword } }
+    );
+
+    // ✅ Fetch updated users list
     const users = await userModel.find({});
 
-    // Render dashboard with success message for SweetAlert
-    res.render('admin/dashboard', {
+    // ✅ Render dashboard with success alert
+    res.render("admin/dashboard", {
       admin: req.session.admin,
       users,
-      success: 'user_updated'
+      success: "user_updated"
     });
-    } catch (error) {
-        console.log(error)
-    }
-}
+  } catch (error) {
+    console.error("Edit user error:", error);
+  }
+};
+
 
 const deleteUser = async (req,res)=>{
     try {
@@ -101,26 +125,47 @@ const deleteUser = async (req,res)=>{
     }
 }
 
-const addUser = async (req,res)=>{
-    try {
-        const {email,username,password} = req.body
-        const hashedPassword = await bcrypt.hash(password,10)
-        const newUser = new userModel({
-            username,
-            email,
-            password:hashedPassword
-        })
-        await newUser.save()
-        const users = await userModel.find({});
-        res.render('admin/dashboard', {
-  admin: req.session.admin,
-  users,
-  success: 'user_added'
-});
-    } catch (error) {
-        console.log(error)
+const addUser = async (req, res) => {
+  try {
+    const { email, username, password } = req.body;
+
+    // 🔍 Check if user already exists (by email or username)
+    const existingUser = await userModel.findOne({
+      $or: [{ email }, { username }]
+    });
+
+    if (existingUser) {
+      const users = await userModel.find({});
+      return res.render("admin/dashboard", {
+        admin: req.session.admin,
+        users,
+        success: "user_exists" // 👈 Pass a flag to trigger SweetAlert
+      });
     }
-}
+
+    // 🔑 Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // 🆕 Create new user
+    const newUser = new userModel({
+      username,
+      email,
+      password: hashedPassword
+    });
+
+    await newUser.save();
+
+    // ✅ Re-render dashboard with success message
+    const users = await userModel.find({});
+    res.render("admin/dashboard", {
+      admin: req.session.admin,
+      users,
+      success: "user_added"
+    });
+  } catch (error) {
+    console.log("Add user error:", error);
+  }
+};
 
 const searchUser = async (req,res)=>{
     try {

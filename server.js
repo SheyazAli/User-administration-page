@@ -6,6 +6,8 @@ const path = require("path");
 const connectdb = require("./db/connectdb");
 const session = require("express-session");
 const nocache = require("nocache");
+require('dotenv').config();
+
 
 //  View setup
 app.set("views", path.join(__dirname, "views"));
@@ -15,6 +17,14 @@ app.set("view engine", "hbs");
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+const logger = (req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
+};
+
+app.use(logger);
+
 
 //  Add session + nocache BEFORE routes
 app.use(session({
